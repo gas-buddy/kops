@@ -17,16 +17,16 @@
 set -e
 
 #Set all the variables in this section
-CLUSTER_NAME="myfirstcluster.k8s.local"
-CLOUD_PROVIDER=aws
-IMAGE=k8s.gcr.io/cluster-autoscaler:v1.1.0
-MIN_NODES=2
-MAX_NODES=20
-AWS_REGION=us-east-1
-INSTANCE_GROUP_NAME="nodes"
-ASG_NAME="${INSTANCE_GROUP_NAME}.${CLUSTER_NAME}"   #ASG_NAME should be the name of ASG as seen on AWS console. 
-IAM_ROLE="masters.${CLUSTER_NAME}"                  #Where will the cluster-autoscaler process run? Currently on the master node. 
-SSL_CERT_PATH="/etc/ssl/certs/ca-certificates.crt"  #(/etc/ssl/certs for gce, /etc/ssl/certs/ca-bundle.crt for RHEL7.X)
+CLUSTER_NAME=${CLUSTER_NAME:-"myfirstcluster.k8s.local"}
+CLOUD_PROVIDER=${CLOUD_PROVIDER:-aws}
+IMAGE=${IMAGE:-k8s.gcr.io/cluster-autoscaler:v1.1.0}
+MIN_NODES=${MIN_NODES:-2}
+MAX_NODES=${MAX_NODES:-20}
+AWS_REGION=${AWS_REGION:-us-east-1}
+INSTANCE_GROUP_NAME=${INSTANCE_GROUP_NAME:-"nodes"}
+ASG_NAME=${ASG_NAME:-"${INSTANCE_GROUP_NAME}.${CLUSTER_NAME}"}   #ASG_NAME should be the name of ASG as seen on AWS console.
+IAM_ROLE=${IAM_ROLE:-"masters.${CLUSTER_NAME}"}                  #Where will the cluster-autoscaler process run? Currently on the master node.
+SSL_CERT_PATH=${SSL_CERT_PATH:-"/etc/ssl/certs/ca-certificates.crt"}  #(/etc/ssl/certs for gce, /etc/ssl/certs/ca-bundle.crt for RHEL7.X)
 #KOPS_STATE_STORE="s3://___"        #KOPS_STATE_STORE might already be set as an environment variable, in which case it doesn't have to be changed.
 
 
@@ -74,9 +74,9 @@ cat > asg-policy.json << EOF
 }
 EOF
 
-ASG_POLICY_NAME=aws-cluster-autoscaler
+ASG_POLICY_NAME=${ASG_POLICY_NAME:-aws-cluster-autoscaler}
 unset TESTOUTPUT
-TESTOUTPUT=$(aws iam list-policies --output json | jq -r '.Policies[] | select(.PolicyName == "aws-cluster-autoscaler") | .Arn')
+TESTOUTPUT=${TESTOUTPUT:-$(aws iam list-policies --output json | jq -r '.Policies[] | select(.PolicyName == "aws-cluster-autoscaler") | .Arn')}
 if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
 then
   printf " ✅  Policy already exists\n"
