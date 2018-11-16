@@ -18,6 +18,7 @@ set -e
 
 #Set all the variables in this section
 CLUSTER_NAME=${CLUSTER_NAME:-"myfirstcluster.k8s.local"}
+AUTOSCALER_VERSION=${AUTOSCALER_VERSION:-"v1.8.0"}
 CLOUD_PROVIDER=${CLOUD_PROVIDER:-aws}
 IMAGE=${IMAGE:-k8s.gcr.io/cluster-autoscaler:v1.1.0}
 MIN_NODES=${MIN_NODES:-2}
@@ -28,7 +29,7 @@ ASG_NAME=${ASG_NAME:-"${INSTANCE_GROUP_NAME}.${CLUSTER_NAME}"}   #ASG_NAME shoul
 IAM_ROLE=${IAM_ROLE:-"masters.${CLUSTER_NAME}"}                  #Where will the cluster-autoscaler process run? Currently on the master node.
 SSL_CERT_PATH=${SSL_CERT_PATH:-"/etc/ssl/certs/ca-certificates.crt"}  #(/etc/ssl/certs for gce, /etc/ssl/certs/ca-bundle.crt for RHEL7.X)
 #KOPS_STATE_STORE="s3://___"        #KOPS_STATE_STORE might already be set as an environment variable, in which case it doesn't have to be changed.
-
+BRANCH=${BRANCH:-master}
 
 #Best-effort install script prerequisites, otherwise they will need to be installed manually.
 if [[ -f /usr/bin/apt-get && ! -f /usr/bin/jq ]]
@@ -93,7 +94,7 @@ aws iam attach-role-policy --policy-arn $ASG_POLICY_ARN --role-name $IAM_ROLE
 printf " ✅ \n"
 
 addon=cluster-autoscaler.yml
-manifest_url=https://raw.githubusercontent.com/kubernetes/kops/master/addons/cluster-autoscaler/v1.8.0.yaml
+manifest_url=https://raw.githubusercontent.com/kubernetes/kops/${BRANCH}/addons/cluster-autoscaler/${AUTOSCALER_VERSION}.yaml
 
 if which -s wget; then
   wget -O ${addon} ${manifest_url}
